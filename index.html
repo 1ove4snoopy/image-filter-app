@@ -5,7 +5,14 @@
 </head>
 <body>
   <h1>AI Image Filter App</h1>
+
   <input type="file" id="upload">
+  <br><br>
+
+  <button onclick="applyGrayscale()">グレースケール</button>
+  <button onclick="applyInvert()">反転</button>
+  <button onclick="resetImage()">リセット</button>
+
   <br><br>
   <canvas id="canvas"></canvas>
 
@@ -14,6 +21,9 @@
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
 
+    let originalImage = null; // 元画像保存
+
+    // 画像アップロード
     upload.addEventListener('change', function(e) {
       const file = e.target.files[0];
       const img = new Image();
@@ -24,19 +34,46 @@
         canvas.height = img.height;
         ctx.drawImage(img, 0, 0);
 
-        let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        let data = imageData.data;
-
-        for (let i = 0; i < data.length; i += 4) {
-          let avg = (data[i] + data[i+1] + data[i+2]) / 3;
-          data[i] = avg;
-          data[i+1] = avg;
-          data[i+2] = avg;
-        }
-
-        ctx.putImageData(imageData, 0, 0);
+        // 元画像保存
+        originalImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
       }
     });
+
+    // グレースケール
+    function applyGrayscale() {
+      let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      let data = imageData.data;
+
+      for (let i = 0; i < data.length; i += 4) {
+        let avg = (data[i] + data[i+1] + data[i+2]) / 3;
+        data[i] = avg;
+        data[i+1] = avg;
+        data[i+2] = avg;
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+    }
+
+    // 反転
+    function applyInvert() {
+      let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      let data = imageData.data;
+
+      for (let i = 0; i < data.length; i += 4) {
+        data[i] = 255 - data[i];
+        data[i+1] = 255 - data[i+1];
+        data[i+2] = 255 - data[i+2];
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+    }
+
+    // リセット（元画像に戻す）
+    function resetImage() {
+      if (originalImage) {
+        ctx.putImageData(originalImage, 0, 0);
+      }
+    }
   </script>
 </body>
 </html>
